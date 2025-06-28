@@ -33,7 +33,7 @@ Definition sizeVal_def:
   (sizeComp (ret v) = 1 + sizeVal v) ∧
   (sizeComp (seq m n) = 1 + sizeComp m + sizeComp n) ∧
   (sizeComp (letin v m) = 1 + sizeVal v + sizeComp m) ∧
-  (sizeComp (pseq m1 m2 n) = 1 + sizeComp m1 + sizeComp m2 + sizeComp n)
+  (sizeComp (pseq m2 m1 n) = 1 + sizeComp m2 + sizeComp m1 + sizeComp n)
 End
 
 (* substVal s k u:
@@ -47,7 +47,7 @@ Definition substVal_def:
   (substComp (ret v) k u = ret (substVal v k u)) ∧
   (substComp (seq m n) k u = seq (substComp m k u) (substComp n (SUC k) u)) ∧
   (substComp (letin v m) k u = letin (substVal v k u) (substComp m (SUC k) u)) ∧
-  (substComp (pseq m1 m2 n) k u = pseq (substComp m1 k u) (substComp m2 k u) (substComp n (SUC (SUC k)) u)) 
+  (substComp (pseq m2 m1 n) k u = pseq (substComp m2 k u) (substComp m1 k u) (substComp n (SUC (SUC k)) u)) 
 End 
 
 val t1 = ``force (thunk (app (lam (ret (var 0))) (var 1)))`` 
@@ -66,15 +66,15 @@ Inductive primitive_step:
         (∀m m' v. substComp m 0 v = m' ⇒ primitive_step (app (lam m) v) m') ∧
         (∀m m' v. (substComp m 0 v) = m' ⇒ (primitive_step (letin v m) m')) ∧
         (∀n n' v.  (substComp n 0 v) = n' ⇒ (primitive_step (seq (ret v) n) n')) ∧
-        (∀v1 v2 n n'.  (substComp (substComp n 0 v1) 1 v2) = n' ⇒ (primitive_step (pseq (ret v1) (ret v2) n) n')) 
+        (∀v1 v2 n n'.  (substComp (substComp n 0 v1) 1 v2) = n' ⇒ (primitive_step (pseq (ret v2) (ret v1) n) n')) 
 End
 
 Inductive small_step:
         (∀m m'. primitive_step m m' ⇒ small_step m m') ∧
         (∀m m' v. small_step m m' ⇒ small_step (app m v) (app m' v)) ∧
         (∀m m' n. small_step m m' ⇒ small_step (seq m n) (seq m' n)) ∧
-        (∀m1 m1' m2 n. small_step m1 m1' ⇒ small_step (pseq m1 m2 n) (pseq m1' m2 n)) ∧ 
-        (∀v m2 m2' n. small_step m2 m2' ⇒ small_step (pseq (ret v) m2 n) (pseq (ret v)  m2' n))
+        (∀m1 m1' m2 n. small_step m1 m1' ⇒ small_step (pseq m2 m1 n) (pseq m2 m1' n)) ∧ 
+        (∀v m2 m2' n. small_step m2 m2' ⇒ small_step (pseq m2 (ret v) n) (pseq m2' (ret v) n))
 End
 
 (* ==========================
@@ -91,7 +91,7 @@ Inductive big_step:
         (∀m n n' v. big_step m (ret v) ∧ big_step (substComp n 0 v) n' ⇒
                                  big_step (seq m n) n') ∧
         (∀m1 m2 v1 v2 n n'. big_step m1 (ret v1) ∧ big_step m2 (ret v2) ∧ big_step (substComp (substComp n 0 v1) 1 v2) n' ⇒
-                                 big_step (pseq m1 m2 n) n')
+                                 big_step (pseq m2 m1 n) n')
 End
 
 (* -- Big-Step Semantics with Time Cost -- *)
@@ -119,7 +119,7 @@ Inductive timeBS:
     timeBS j m2 (ret v2) ∧
     timeBS k (substComp (substComp n 0 v1) 1 v2) u ∧
     l = i+j+1+k ⇒
-    timeBS l (pseq m1 m2 n) u)
+    timeBS l (pseq m2 m1 n) u)
 [~Letin:]
   (∀m v u k l.
     timeBS k (substComp m 0 v) u ∧
@@ -157,7 +157,7 @@ Inductive spaceBS:
     spaceBS k2 m2 (ret v2) ∧
     spaceBS k3 (substComp (substComp n 0 v1) 1 v2) u ∧
     k = MAX (k1 + sizeComp m2 + 1 + sizeComp n) $ MAX (k2 + sizeVal v1 + 1 + sizeComp n) k3 ⇒
-    spaceBS k (pseq m1 m2 n) u) 
+    spaceBS k (pseq m2 m1 n) u) 
 [~Letin:]
   (∀m v u k0 k.
     spaceBS k0 (substComp m 0 v) u ∧
@@ -196,7 +196,7 @@ Inductive boundVal:
   (∀k v. boundVal k v ⇒ boundComp k (ret v)) ∧
   (∀k v. boundVal k v ⇒ boundComp k (force v)) ∧
   (∀k m n. boundComp k m ∧ boundComp (SUC k) n ⇒ boundComp k (seq m n)) ∧
-  (∀k m1 m2 n. boundComp k m1 ∧ boundComp k m2 ∧ boundComp (SUC (SUC k)) n ⇒ boundComp k (pseq m1 m2 n)) ∧
+  (∀k m1 m2 n. boundComp k m1 ∧ boundComp k m2 ∧ boundComp (SUC (SUC k)) n ⇒ boundComp k (pseq m2 m1 n)) ∧
   (∀k v m. boundVal k v ∧ boundComp (SUC k) m ⇒ boundComp k (letin v m))
 End
 

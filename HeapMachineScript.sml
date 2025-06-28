@@ -217,7 +217,7 @@ Inductive unfoldsVal:
     unfoldsComp H a k m1 m1' ∧
     unfoldsComp H a k m2 m2' ∧
     unfoldsComp H a (SUC $ SUC k) n n' ⇒
-    unfoldsComp H a k (pseq m1 m2 n) (pseq m1' m2' n'))
+    unfoldsComp H a k (pseq m2 m1 n) (pseq m2' m1' n'))
 [~Letin:]
   (∀H k v v' m m'.
     unfoldsVal H a k v v' ∧
@@ -478,7 +478,7 @@ Theorem closed_simps[simp]:
   (closedComp(force v) ⇔ closedVal v) ∧
   (closedComp(app m v) ⇔ closedComp m ∧ closedVal v) ∧
   (closedComp(seq m n) ⇔ closedComp m ∧ boundComp 1 n) ∧
-  (closedComp(pseq m1 m2 n) ⇔ closedComp m1 ∧ closedComp m2 ∧ boundComp 2 n) ∧
+  (closedComp(pseq m2 m1 n) ⇔ closedComp m1 ∧ closedComp m2 ∧ boundComp 2 n) ∧
   (closedComp(letin v n) ⇔ closedVal v ∧ boundComp 1 n)
 Proof
   rw[closedComp_def,closedVal_def] >>

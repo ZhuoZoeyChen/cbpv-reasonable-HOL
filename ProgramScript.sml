@@ -27,7 +27,7 @@ Definition compileVal_def:
   (compileComp (lam m) = lamT::compileComp m ++ [endLamT]) ∧
   (compileComp (app m v) = compileComp m ++ compileVal v ++ [appT]) ∧
   (compileComp (seq m n) = compileComp m ++ [seqT] ++ compileComp n ++ [endSeqT]) ∧
-  (compileComp (pseq m1 m2 n) = compileComp m1 ++ compileComp m2 ++ [pseqT] ++ compileComp n ++ [endPseqT]) ∧
+  (compileComp (pseq m2 m1 n) = compileComp m1 ++ compileComp m2 ++ [pseqT] ++ compileComp n ++ [endPseqT]) ∧
   (compileComp (letin v m) = compileVal v ++ [letinT] ++ compileComp m ++ [endLetinT])
 End
 
@@ -890,12 +890,12 @@ Proof
   >- (rw[Once compileVal_def, substVal_def] >>
       rw[Once compileVal_def, substVal_def] >>
       first_x_assum (qspecl_then [`SUC (SUC k)`, `[endPseqT] ⧺ c'`, `t`] ASSUME_TAC) >>
-      first_x_assum (qspecl_then [`k`, `[pseqT] ++ compileComp s'' ⧺ [endPseqT] ⧺ c'`, `t`] ASSUME_TAC) >>
       first_x_assum (qspecl_then [`k`,
-                                  `compileComp s' ⧺
+                                   `compileComp s ⧺
                                    [pseqT] ⧺ compileComp s'' ⧺
                                    [endPseqT] ⧺ c'`,
-                                  `t`] ASSUME_TAC) >>
+                                   `t`] ASSUME_TAC) >>
+      first_x_assum (qspecl_then [`k`, `[pseqT] ++ compileComp s'' ⧺ [endPseqT] ⧺ c'`, `t`] ASSUME_TAC) >>
       rw[] >> gs[] >> rw[Once substP] >>
       simp[SimpR ``$=``, Once compileVal_def] >>
       rw[Once substP] >> rw[Once substP])
@@ -1349,7 +1349,7 @@ Proof
           simp[SUM_APPEND,sizeT]) >>
       unabbrev_all_tac >>
       rpt $ PRED_ASSUM is_forall kall_tac >>
-      ‘balanced(compileComp c' ++ compileComp c0)’ by metis_tac[balanced_compileVal,balanced_rules] >>
+      ‘balanced(compileComp c0 ++ compileComp c')’ by metis_tac[balanced_compileVal,balanced_rules] >>
       gvs[] >>
       drule balanced_pseqs_prefix >>
       simp[] >>

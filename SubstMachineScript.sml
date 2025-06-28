@@ -236,7 +236,7 @@ Proof
   >- (Cases_on `compileComp s ⧺ compileVal v ⧺ [appT] ⧺ c` >> rw[] >> gs[])
   >- (Cases_on `compileComp s ⧺ [seqT] ++ compileComp s' ⧺ [endSeqT] ⧺ c` >> rw[] >> gs[])
   >- (Cases_on `compileVal v ++ [letinT] ++ compileComp s ++ [endLetinT] ++ c` >> rw[] >> gs[])
-  >> Cases_on `compileComp s ⧺ compileComp s' ⧺ [pseqT] ⧺
+  >> Cases_on `compileComp s' ⧺ compileComp s ⧺ [pseqT] ⧺
            compileComp s'' ⧺ [endPseqT] ⧺ c` >> rw[] >> gs[]
 QED
 
@@ -248,7 +248,7 @@ Proof
   >- (Cases_on `compileComp s ⧺ compileVal v ⧺ [appT]` >> rw[] >> gs[])
   >- (Cases_on `compileComp s ⧺ [seqT] ++ compileComp s' ⧺ [endSeqT]` >> rw[] >> gs[])
   >- (Cases_on `compileVal v ++ [letinT] ++ compileComp s ++ [endLetinT]` >> rw[] >> gs[])
-  >> Cases_on `compileComp s ⧺ compileComp s' ⧺ [pseqT] ⧺
+  >> Cases_on `compileComp s' ⧺ compileComp s ⧺ [pseqT] ⧺
               compileComp s'' ⧺ [endPseqT]` >> rw[] >> gs[]
 QED
 

@@ -12,7 +12,7 @@ val _ = new_theory "compilation";
 Definition compile_def:
   (compile (dV x) =  ret $ var x) ∧
   (compile (dAPP s t) =
-   pseq (compile s) (compile t) (app (force $ var 0) (var 1))) ∧
+   pseq (compile t) (compile s) (app (force $ var 0) (var 1))) ∧
   (compile (dABS s) =
    ret $ thunk $ lam $ compile s)
 Termination
